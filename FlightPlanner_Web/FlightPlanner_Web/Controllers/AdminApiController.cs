@@ -15,10 +15,6 @@ namespace FlightPlanner_Web.Controllers
         [Route("flights/{id}")]
         public IActionResult GetFlights(int id)
         {
-            if (!BasicAuthenticationHandler.isauthorized)
-            {
-                return Unauthorized();
-            }
             return NotFound();
         }
 
@@ -27,12 +23,12 @@ namespace FlightPlanner_Web.Controllers
         public IActionResult PutFlight(AddFlightRequest request)
         {
            var flight = FlightStorage.AddFlight(request);
-           if (FlightStorage.flightExist)
+           if (FlightStorage.Exists(request))
            {
-               return NotFound();
+               return Conflict();
            }
 
-           return Created("",flight);
+           return Created("",FlightStorage.AddFlight(request));
         }
     }
 }
