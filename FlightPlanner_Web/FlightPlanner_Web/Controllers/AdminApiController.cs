@@ -1,4 +1,5 @@
-﻿using FlightPlanner_Web.Handlers;
+﻿using System.Collections.Generic;
+using FlightPlanner_Web.Handlers;
 using FlightPlanner_Web.Models;
 using FlightPlanner_Web.Storage;
 using FlightPlanner_Web.Validation;
@@ -23,7 +24,12 @@ namespace FlightPlanner_Web.Controllers
         [Route("flights")]
         public IActionResult PutFlight(AddFlightRequest request)
         {
-            if (!FlightValidation.IsValid(request))
+            if (!FlightValidation.FlightIsValid(request))
+            {
+                return BadRequest();
+            }
+
+            if (!AirportValidation.AirportIsValid(request))
             {
                 return BadRequest();
             }
@@ -32,6 +38,8 @@ namespace FlightPlanner_Web.Controllers
             {
                 return Conflict();
             }
+
+            var list = new List<int>();
 
             return Created("",FlightStorage.AddFlight(request));
         }

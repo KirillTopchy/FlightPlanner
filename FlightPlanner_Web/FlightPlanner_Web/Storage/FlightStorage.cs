@@ -44,8 +44,6 @@ namespace FlightPlanner_Web.Storage
                 f.From.AirportName == request.From.AirportName &&
                 f.To.AirportName == request.To.AirportName);
         }
-
-        
     }
 }
  
