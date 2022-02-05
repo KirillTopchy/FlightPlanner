@@ -39,54 +39,13 @@ namespace FlightPlanner_Web.Storage
         {
             return _flights.Any(f => 
                 f.Carrier.ToLower().Trim() == request.Carrier.ToLower().Trim() &&
-                f.DepartureTime == request.DepartureTime &&
+                f.DepartureTime.ToLower().Trim() == request.DepartureTime.ToLower().Trim() &&
                 f.ArrivalTime.ToLower().Trim() == request.ArrivalTime.ToLower().Trim() &&
-                f.From == request.From &&
-                f.To == request.To);
+                f.From.AirportName == request.From.AirportName &&
+                f.To.AirportName == request.To.AirportName);
         }
 
-        public static bool IsValid(AddFlightRequest request)
-        {
-            if (request == null)
-            {
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(request.ArrivalTime) || string.IsNullOrEmpty(request.Carrier) ||
-                string.IsNullOrEmpty(request.DepartureTime))
-            {
-                return false;
-            }
-
-            if (request.From == null || request.To == null)
-            {
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(request.From.AirportName) || string.IsNullOrEmpty(request.From.City) ||
-                string.IsNullOrEmpty(request.From.Country))
-            {
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(request.To.AirportName) || string.IsNullOrEmpty(request.To.City) ||
-                string.IsNullOrEmpty(request.To.Country))
-            {
-                return false;
-            }
-
-            if (request.From.Country.ToLower().Trim() == request.To.Country.ToLower().Trim() &&
-                request.From.City.ToLower().Trim() == request.To.City.ToLower().Trim() &&
-                request.From.AirportName.ToLower().Trim() == request.To.AirportName.ToLower().Trim())
-            {
-                return false;
-            }
-
-            var arrivalTime = DateTime.Parse(request.ArrivalTime);
-            var departureTime = DateTime.Parse(request.DepartureTime);
-
-            return arrivalTime > departureTime;
-        }
+        
     }
 }
  

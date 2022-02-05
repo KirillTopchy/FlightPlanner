@@ -1,6 +1,7 @@
 ﻿using FlightPlanner_Web.Handlers;
 using FlightPlanner_Web.Models;
 using FlightPlanner_Web.Storage;
+using FlightPlanner_Web.Validation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,7 +23,7 @@ namespace FlightPlanner_Web.Controllers
         [Route("flights")]
         public IActionResult PutFlight(AddFlightRequest request)
         {
-            if (!FlightStorage.IsValid(request))
+            if (!FlightValidation.IsValid(request))
             {
                 return BadRequest();
             }
