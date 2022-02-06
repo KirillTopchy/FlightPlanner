@@ -5,7 +5,7 @@ namespace FlightPlanner_Web.Controllers
 {
     [Route("testing-api")]
     [ApiController]
-    public class TestingController : ControllerBase
+    public class TestingApiController : ControllerBase
     {
         [HttpPost]
         [Route("clear")]

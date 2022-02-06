@@ -38,7 +38,12 @@ namespace FlightPlanner_Web.Validation
             var arrivalTime = DateTime.Parse(request.ArrivalTime);
             var departureTime = DateTime.Parse(request.DepartureTime);
 
-            return arrivalTime > departureTime;
+            if (arrivalTime <= departureTime)
+            {
+                return false;
+            }
+
+            return true;
         }
 
     }

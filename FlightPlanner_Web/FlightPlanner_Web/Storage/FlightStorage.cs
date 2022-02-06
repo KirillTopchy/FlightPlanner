@@ -33,7 +33,21 @@ namespace FlightPlanner_Web.Storage
         {
             _flights.Clear();
             _id = 0;
-        } 
+        }
+
+        public static void DeleteFlight(int id)
+        {
+            var flight = GetFlight(id);
+            if (flight != null)
+            {
+                _flights.Remove(flight);
+            }
+        }
+
+        public static Flight GetFlight(int id)
+        {
+            return _flights.SingleOrDefault(f => f.Id == id);
+        }
 
         public static bool Exists(AddFlightRequest request)
         {
@@ -41,8 +55,8 @@ namespace FlightPlanner_Web.Storage
                 f.Carrier.ToLower().Trim() == request.Carrier.ToLower().Trim() &&
                 f.DepartureTime.ToLower().Trim() == request.DepartureTime.ToLower().Trim() &&
                 f.ArrivalTime.ToLower().Trim() == request.ArrivalTime.ToLower().Trim() &&
-                f.From.AirportName == request.From.AirportName &&
-                f.To.AirportName == request.To.AirportName);
+                f.From.AirportName.ToLower().Trim() == request.From.AirportName.ToLower().Trim() &&
+                f.To.AirportName.ToLower().Trim() == request.To.AirportName.ToLower().Trim());
         }
     }
 }
