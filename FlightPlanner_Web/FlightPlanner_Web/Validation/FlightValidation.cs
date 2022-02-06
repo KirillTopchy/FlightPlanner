@@ -46,5 +46,21 @@ namespace FlightPlanner_Web.Validation
             return true;
         }
 
+        public static bool IsValidSearchFlightRequest(SearchFlightRequest search)
+        {
+            if (search == null)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(search.From) ||
+                string.IsNullOrEmpty(search.To) ||
+                string.IsNullOrEmpty(search.DepartureDate))
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }

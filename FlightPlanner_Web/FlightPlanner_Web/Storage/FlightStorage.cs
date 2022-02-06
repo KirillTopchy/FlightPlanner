@@ -49,6 +49,11 @@ namespace FlightPlanner_Web.Storage
             return _flights.SingleOrDefault(f => f.Id == id);
         }
 
+        public static List<Flight> GetFlightsList()
+        {
+            return _flights;
+        }
+
         public static bool Exists(AddFlightRequest request)
         {
             return _flights.Any(f => 
