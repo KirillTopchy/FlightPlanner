@@ -58,6 +58,23 @@ namespace FlightPlanner_Web.Storage
                 f.From.AirportName.ToLower().Trim() == request.From.AirportName.ToLower().Trim() &&
                 f.To.AirportName.ToLower().Trim() == request.To.AirportName.ToLower().Trim());
         }
+
+        public static List<Airport> FindAirport(string userInput)
+        {
+            var fromAirportsList = _flights.Where(a =>
+                a.From.AirportName.ToLower().Trim().Contains(userInput.ToLower().Trim()) ||
+                a.From.City.ToLower().Trim().Contains(userInput.ToLower().Trim()) ||
+                a.From.Country.ToLower().Trim().Contains(userInput.ToLower().Trim()))
+                .Select(a => a.From).ToList();
+
+            var toAirportsList = _flights.Where(a =>
+                a.To.AirportName.ToLower().Trim().Contains(userInput.ToLower().Trim()) ||
+                a.To.City.ToLower().Trim().Contains(userInput.ToLower().Trim()) ||
+                a.To.Country.ToLower().Trim().Contains(userInput.ToLower().Trim()))
+                .Select(a => a.To).ToList();
+
+            return fromAirportsList.Concat(toAirportsList).ToList();
+        }
     }
 }
  
