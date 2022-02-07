@@ -11,11 +11,10 @@ namespace FlightPlanner_Web.Models
 
         public List<Flight> Items { get; set; }
 
-        public PageResult(List<Flight> items)
+        public PageResult()
         {
-            Page = 0;
-            TotalItems = items.Count();
-            Items = items;
+            Items = new List<Flight>();
         }
+
     }
 }

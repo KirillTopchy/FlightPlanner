@@ -28,7 +28,20 @@ namespace FlightPlanner_Web.Controllers
                 return BadRequest();
             }
 
-            return Ok(SearchFlightRequest.FindFlights(search));
+            return Ok(new PageResult());
         }
+
+        [HttpGet]
+        [Route("flights/{id}")]
+        public IActionResult SearchFlights(int id)
+        {
+            var flight = FlightStorage.GetFlight(id);
+            if (flight == null)
+            {
+                return NotFound();
+            }
+            return Ok(flight);
+        }
+
     }
 }
