@@ -26,7 +26,7 @@ namespace FlightPlanner_Web.Controllers
         [Route("flights/search")]
         public IActionResult SearchFlights(SearchFlightRequest request)
         {
-            if ((!FlightValidation.IsValidSearchFlightRequest(request)) || (request.From == request.To))
+            if (!FlightValidation.IsValidSearchFlightRequest(request))
             {
                 return BadRequest();
             }
@@ -43,6 +43,7 @@ namespace FlightPlanner_Web.Controllers
             {
                 return NotFound();
             }
+
             return Ok(flight);
         }
     }

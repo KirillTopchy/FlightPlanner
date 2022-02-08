@@ -60,6 +60,11 @@ namespace FlightPlanner_Web.Validation
                 return false;
             }
 
+            if (search.From == search.To)
+            {
+                return false;
+            }
+
             return true;
         }
     }
