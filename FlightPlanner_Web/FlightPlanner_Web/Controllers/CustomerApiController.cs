@@ -1,5 +1,6 @@
 ﻿using FlightPlanner_Web.Models;
 using FlightPlanner_Web.Storage;
+using FlightPlanner_Web.Validation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlightPlanner_Web.Controllers
@@ -23,12 +24,12 @@ namespace FlightPlanner_Web.Controllers
 
         [HttpPost]
         [Route("flights/search")]
-        public IActionResult SearchFlights(SearchFlightRequest req)
+        public IActionResult SearchFlights(SearchFlightRequest request)
         {
-            //if (!FlightValidation.IsValidSearchFlightRequest(request) || request.To.Equals(request.From))
-            //{
-            //    return BadRequest();
-            //}
+            if ((!FlightValidation.IsValidSearchFlightRequest(request)) || (request.From == request.To))
+            {
+                return BadRequest();
+            }
 
             return Ok(new PageResult());
         }
