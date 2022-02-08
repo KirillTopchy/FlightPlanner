@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using FlightPlanner_Web.Handlers;
 using FlightPlanner_Web.Models;
 using FlightPlanner_Web.Storage;
@@ -53,7 +54,7 @@ namespace FlightPlanner_Web.Controllers
                 return Conflict();
             }
 
-            return Created("",FlightStorage.AddFlight(request));
+            return Created("", FlightStorage.AddFlight(request));
         }
     }
 }
