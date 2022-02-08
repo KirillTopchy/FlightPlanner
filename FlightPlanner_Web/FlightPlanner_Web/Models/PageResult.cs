@@ -15,6 +15,5 @@ namespace FlightPlanner_Web.Models
         {
             Items = new List<Flight>();
         }
-
     }
 }

@@ -9,7 +9,7 @@ namespace FlightPlanner_Web.Controllers
     {
         [HttpPost]
         [Route("clear")]
-        public IActionResult Clear(int id)
+        public IActionResult Clear()
         {
             FlightStorage.ClearFlights();
             return Ok();
