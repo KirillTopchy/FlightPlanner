@@ -14,47 +14,58 @@ namespace FlightPlanner_Web.Controllers
     [Authorize]
     public class AdminApiController : ControllerBase
     {
+        private readonly object storageLock = new object();
+
         [HttpGet]
         [Route("flights/{id}")]
         public IActionResult GetFlights(int id)
         {
-            var flight = FlightStorage.GetFlight(id);
-            if (flight == null)
+            lock (storageLock)
             {
-                return NotFound();
-            }
+                var flight = FlightStorage.GetFlight(id);
+                if (flight == null)
+                {
+                    return NotFound();
+                }
 
-            return Ok(flight);
+                return Ok(flight);
+            }
         }
 
         [HttpDelete]
         [Route("flights/{id}")]
         public IActionResult DeleteFlight(int id)
         {
-            FlightStorage.DeleteFlight(id);
-            return Ok();
+            lock (storageLock)
+            {
+                FlightStorage.DeleteFlight(id);
+                return Ok();
+            }
         }
 
         [HttpPut, Authorize]
         [Route("flights")]
         public IActionResult PutFlight(AddFlightRequest request)
         {
-            if (!FlightValidation.FlightIsValid(request))
+            lock (storageLock)
             {
-                return BadRequest();
-            }
+                if (!FlightValidation.FlightIsValid(request))
+                {
+                    return BadRequest();
+                }
 
-            if (!AirportValidation.AirportIsValid(request))
-            {
-                return BadRequest();
-            }
+                if (!AirportValidation.AirportIsValid(request))
+                {
+                    return BadRequest();
+                }
 
-            if (FlightStorage.Exists(request))
-            {
-                return Conflict();
-            }
+                if (FlightStorage.Exists(request))
+                {
+                    return Conflict();
+                }
 
-            return Created("", FlightStorage.AddFlight(request));
+                return Created("", FlightStorage.AddFlight(request));
+            }
         }
     }
 }

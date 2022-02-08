@@ -16,18 +16,21 @@ namespace FlightPlanner_Web.Storage
 
         public static Flight AddFlight(AddFlightRequest request)
         {
-            var flight = new Flight
+            lock (flightLock)
             {
-                From = request.From,
-                To = request.To,
-                ArrivalTime = request.ArrivalTime,
-                DepartureTime = request.DepartureTime,
-                Carrier = request.Carrier,
-                Id = ++_id
-            };
-            _flights.Add(flight);
+                var flight = new Flight
+                {
+                    From = request.From,
+                    To = request.To,
+                    ArrivalTime = request.ArrivalTime,
+                    DepartureTime = request.DepartureTime,
+                    Carrier = request.Carrier,
+                    Id = ++_id
+                };
+                _flights.Add(flight);
 
-            return flight;
+                return flight;
+            }
         }
 
         public static void ClearFlights()
@@ -53,9 +56,10 @@ namespace FlightPlanner_Web.Storage
 
         public static Flight GetFlight(int id)
         {
-
+            lock (flightLock)
+            {
                 return _flights.SingleOrDefault(f => f.Id == id);
-        
+            }
         }
 
         public static bool Exists(AddFlightRequest request)
