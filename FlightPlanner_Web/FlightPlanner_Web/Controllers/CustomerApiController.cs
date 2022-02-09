@@ -31,7 +31,7 @@ namespace FlightPlanner_Web.Controllers
                 return BadRequest();
             }
 
-            return Ok(new PageResult());
+            return Ok(FlightStorage.SearchFlight(request));
         }
 
         [HttpGet]

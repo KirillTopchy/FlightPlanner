@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using FlightPlanner_Web.Storage;
-
-namespace FlightPlanner_Web.Models
+﻿namespace FlightPlanner_Web.Models
 {
     public class SearchFlightRequest
     {

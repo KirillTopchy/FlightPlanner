@@ -47,9 +47,7 @@ namespace FlightPlanner_Web.Storage
 
                 if (flight != null)
                 {
-
-                        Flights.Remove(flight);
-                   
+                    Flights.Remove(flight);
                 }
             }
         }
@@ -64,33 +62,37 @@ namespace FlightPlanner_Web.Storage
 
         public static bool Exists(AddFlightRequest request)
         {
-
-                return Flights.Any(f =>
+            return Flights.Any(f =>
                     f.Carrier.ToLower().Trim() == request.Carrier.ToLower().Trim() &&
                     f.DepartureTime.ToLower().Trim() == request.DepartureTime.ToLower().Trim() &&
                     f.ArrivalTime.ToLower().Trim() == request.ArrivalTime.ToLower().Trim() &&
                     f.From.AirportName.ToLower().Trim() == request.From.AirportName.ToLower().Trim() &&
                     f.To.AirportName.ToLower().Trim() == request.To.AirportName.ToLower().Trim());
-
         }
 
         public static List<Airport> FindAirport(string userInput)
         {
-
-                var fromAirportsList = Flights.Where(a =>
+            var fromAirportsList = Flights.Where(a =>
                         a.From.AirportName.ToLower().Trim().Contains(userInput.ToLower().Trim()) ||
                         a.From.City.ToLower().Trim().Contains(userInput.ToLower().Trim()) ||
                         a.From.Country.ToLower().Trim().Contains(userInput.ToLower().Trim()))
                     .Select(a => a.From).ToList();
 
-                var toAirportsList = Flights.Where(a =>
+            var toAirportsList = Flights.Where(a =>
                         a.To.AirportName.ToLower().Trim().Contains(userInput.ToLower().Trim()) ||
                         a.To.City.ToLower().Trim().Contains(userInput.ToLower().Trim()) ||
                         a.To.Country.ToLower().Trim().Contains(userInput.ToLower().Trim()))
                     .Select(a => a.To).ToList();
 
-                return fromAirportsList.Concat(toAirportsList).ToList();
+            return fromAirportsList.Concat(toAirportsList).ToList();
+        }
 
+        public static PageResult SearchFlight(SearchFlightRequest req)
+        {
+            lock (FlightLock)
+            {
+                return new PageResult(Flights);
+            }
         }
     }
 }

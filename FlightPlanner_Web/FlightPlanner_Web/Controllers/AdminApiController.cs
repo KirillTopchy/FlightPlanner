@@ -1,5 +1,4 @@
-﻿using System;
-using FlightPlanner_Web.Models;
+﻿using FlightPlanner_Web.Models;
 using FlightPlanner_Web.Storage;
 using FlightPlanner_Web.Validation;
 using Microsoft.AspNetCore.Authorization;
@@ -19,69 +18,42 @@ namespace FlightPlanner_Web.Controllers
         public IActionResult GetFlights(int id)
         { 
             var flight = FlightStorage.GetFlight(id);
-            lock (StorageLock)
+            if (flight == null)
             {
-                if (flight == null)
-                {
-                    return NotFound();
-                }
-
-                return Ok(flight);
+                return NotFound();
             }
+
+            return Ok(flight);
         }
 
         [HttpDelete]
         [Route("flights/{id}")]
-        public IActionResult DeleteFlight(int id)
+        public IActionResult DeleteFlight(int id) 
         {
-            try
+            lock (StorageLock)
             {
-                lock (StorageLock)
-                {
-                    FlightStorage.DeleteFlight(id);
-                    return Ok();
-                }
-
+                FlightStorage.DeleteFlight(id);
+                return Ok();
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-
         }
 
         [HttpPut, Authorize]
         [Route("flights")]
         public IActionResult PutFlight(AddFlightRequest request)
         {
-            try
+            lock (StorageLock)
             {
-                lock (StorageLock)
+                if (!FlightValidation.FlightIsValid(request) || !AirportValidation.AirportIsValid(request))
                 {
-                    if (!FlightValidation.FlightIsValid(request))
-                    {
-                        return BadRequest();
-                    }
-
-                    if (!AirportValidation.AirportIsValid(request))
-                    {
-                        return BadRequest();
-                    }
-
-                    if (FlightStorage.Exists(request))
-                    {
-                        return Conflict();
-                    }
-
-                    return Created("", FlightStorage.AddFlight(request));
+                    return BadRequest();
                 }
 
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
+                if (FlightStorage.Exists(request))
+                {
+                    return Conflict();
+                }
+
+                return Created("", FlightStorage.AddFlight(request));
             }
         }
     }
