@@ -1,22 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using FlightPlanner_Web.Controllers;
 using FlightPlanner_Web.Models;
 
 namespace FlightPlanner_Web.Storage
 {
     public static class FlightStorage
     {
-        private static readonly object flightLock = new object();
-        private static List<Flight> _flights = new List<Flight>();
+        private static readonly object FlightLock = new();
+        private static readonly List<Flight> Flights = new();
         private static int _id;
 
         public static Flight AddFlight(AddFlightRequest request)
         {
-            lock (flightLock)
+            lock (FlightLock)
             {
                 var flight = new Flight
                 {
@@ -27,72 +23,74 @@ namespace FlightPlanner_Web.Storage
                     Carrier = request.Carrier,
                     Id = ++_id
                 };
-                _flights.Add(flight);
 
+                Flights.Add(flight);
+            
                 return flight;
             }
         }
 
         public static void ClearFlights()
         {
-            lock (flightLock)
+            lock (FlightLock)
             {
-                _flights.Clear();
-                _id = 0;
+                Flights.Clear();
             }
+            _id = 0;
         }
 
         public static void DeleteFlight(int id)
         {
-            lock (flightLock)
+            lock (FlightLock)
             {
                 var flight = GetFlight(id);
+
                 if (flight != null)
                 {
-                    _flights.Remove(flight);
+
+                        Flights.Remove(flight);
+                   
                 }
             }
         }
 
         public static Flight GetFlight(int id)
         {
-            lock (flightLock)
+            lock (FlightLock)
             {
-                return _flights.SingleOrDefault(f => f.Id == id);
+                return Flights.SingleOrDefault(f => f.Id == id);
             }
         }
 
         public static bool Exists(AddFlightRequest request)
         {
-            lock (flightLock)
-            {
-                return _flights.Any(f =>
+
+                return Flights.Any(f =>
                     f.Carrier.ToLower().Trim() == request.Carrier.ToLower().Trim() &&
                     f.DepartureTime.ToLower().Trim() == request.DepartureTime.ToLower().Trim() &&
                     f.ArrivalTime.ToLower().Trim() == request.ArrivalTime.ToLower().Trim() &&
                     f.From.AirportName.ToLower().Trim() == request.From.AirportName.ToLower().Trim() &&
                     f.To.AirportName.ToLower().Trim() == request.To.AirportName.ToLower().Trim());
-            }
+
         }
 
         public static List<Airport> FindAirport(string userInput)
         {
-            lock (flightLock)
-            {
-                var fromAirportsList = _flights.Where(a =>
+
+                var fromAirportsList = Flights.Where(a =>
                         a.From.AirportName.ToLower().Trim().Contains(userInput.ToLower().Trim()) ||
                         a.From.City.ToLower().Trim().Contains(userInput.ToLower().Trim()) ||
                         a.From.Country.ToLower().Trim().Contains(userInput.ToLower().Trim()))
                     .Select(a => a.From).ToList();
 
-                var toAirportsList = _flights.Where(a =>
+                var toAirportsList = Flights.Where(a =>
                         a.To.AirportName.ToLower().Trim().Contains(userInput.ToLower().Trim()) ||
                         a.To.City.ToLower().Trim().Contains(userInput.ToLower().Trim()) ||
                         a.To.Country.ToLower().Trim().Contains(userInput.ToLower().Trim()))
                     .Select(a => a.To).ToList();
 
                 return fromAirportsList.Concat(toAirportsList).ToList();
-            }
+
         }
     }
 }

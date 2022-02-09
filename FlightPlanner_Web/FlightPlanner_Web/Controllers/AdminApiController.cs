@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using FlightPlanner_Web.Handlers;
 using FlightPlanner_Web.Models;
 using FlightPlanner_Web.Storage;
 using FlightPlanner_Web.Validation;
@@ -14,15 +12,15 @@ namespace FlightPlanner_Web.Controllers
     [Authorize]
     public class AdminApiController : ControllerBase
     {
-        private readonly object storageLock = new object();
+        private static readonly object StorageLock = new();
 
         [HttpGet]
         [Route("flights/{id}")]
         public IActionResult GetFlights(int id)
-        {
-            lock (storageLock)
+        { 
+            var flight = FlightStorage.GetFlight(id);
+            lock (StorageLock)
             {
-                var flight = FlightStorage.GetFlight(id);
                 if (flight == null)
                 {
                     return NotFound();
@@ -36,35 +34,54 @@ namespace FlightPlanner_Web.Controllers
         [Route("flights/{id}")]
         public IActionResult DeleteFlight(int id)
         {
-            lock (storageLock)
+            try
             {
-                FlightStorage.DeleteFlight(id);
-                return Ok();
+                lock (StorageLock)
+                {
+                    FlightStorage.DeleteFlight(id);
+                    return Ok();
+                }
+
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
         }
 
         [HttpPut, Authorize]
         [Route("flights")]
         public IActionResult PutFlight(AddFlightRequest request)
         {
-            lock (storageLock)
+            try
             {
-                if (!FlightValidation.FlightIsValid(request))
+                lock (StorageLock)
                 {
-                    return BadRequest();
+                    if (!FlightValidation.FlightIsValid(request))
+                    {
+                        return BadRequest();
+                    }
+
+                    if (!AirportValidation.AirportIsValid(request))
+                    {
+                        return BadRequest();
+                    }
+
+                    if (FlightStorage.Exists(request))
+                    {
+                        return Conflict();
+                    }
+
+                    return Created("", FlightStorage.AddFlight(request));
                 }
 
-                if (!AirportValidation.AirportIsValid(request))
-                {
-                    return BadRequest();
-                }
-
-                if (FlightStorage.Exists(request))
-                {
-                    return Conflict();
-                }
-
-                return Created("", FlightStorage.AddFlight(request));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
     }

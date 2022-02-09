@@ -39,6 +39,7 @@ namespace FlightPlanner_Web.Controllers
         public IActionResult SearchFlights(int id)
         {
             var flight = FlightStorage.GetFlight(id);
+
             if (flight == null)
             {
                 return NotFound();
