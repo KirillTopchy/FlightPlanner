@@ -11,8 +11,6 @@ namespace FlightPlanner_Web.Controllers
     [Authorize]
     public class AdminApiController : ControllerBase
     {
-        private static readonly object StorageLock = new();
-
         [HttpGet]
         [Route("flights/{id}")]
         public IActionResult GetFlights(int id)
@@ -30,31 +28,25 @@ namespace FlightPlanner_Web.Controllers
         [Route("flights/{id}")]
         public IActionResult DeleteFlight(int id) 
         {
-            lock (StorageLock)
-            {
-                FlightStorage.DeleteFlight(id);
-                return Ok();
-            }
+            FlightStorage.DeleteFlight(id);
+            return Ok();
         }
 
         [HttpPut, Authorize]
         [Route("flights")]
         public IActionResult PutFlight(AddFlightRequest request)
-        {
-            lock (StorageLock)
+        { 
+            if (!FlightValidation.FlightIsValid(request) || !AirportValidation.AirportIsValid(request))
             {
-                if (!FlightValidation.FlightIsValid(request) || !AirportValidation.AirportIsValid(request))
-                {
-                    return BadRequest();
-                }
-
-                if (FlightStorage.Exists(request))
-                {
-                    return Conflict();
-                }
-
-                return Created("", FlightStorage.AddFlight(request));
+                return BadRequest();
             }
+
+            if (FlightStorage.Exists(request))
+            {
+                return Conflict();
+            }
+
+            return Created("", FlightStorage.AddFlight(request));
         }
     }
 }
