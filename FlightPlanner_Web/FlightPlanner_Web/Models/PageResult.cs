@@ -12,6 +12,7 @@ namespace FlightPlanner_Web.Models
 
         public PageResult(List<Flight> items)
         {
+            Page = 0;
             TotalItems = items.Count;
             Items = items;
         }

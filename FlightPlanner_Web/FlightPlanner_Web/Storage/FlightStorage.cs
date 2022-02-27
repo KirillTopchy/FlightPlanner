@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using FlightPlanner_Web.Models;
 using Microsoft.EntityFrameworkCore;
@@ -8,63 +9,52 @@ namespace FlightPlanner_Web.Storage
     public static class FlightStorage
     {
         private static readonly object FlightLock = new();
-        //private static readonly List<Flight> Flights = new();
-        //private static int _id;
-        
 
-        //public static Flight AddFlight(AddFlightRequest request)
-        //{
-        //    lock (FlightLock)
-        //    {
-        //        var flight = new Flight
-        //        {
-        //            From = request.From,
-        //            To = request.To,
-        //            ArrivalTime = request.ArrivalTime,
-        //            DepartureTime = request.DepartureTime,
-        //            Carrier = request.Carrier,
-        //            Id = ++_id
-        //        };
 
-        //        Flights.Add(flight);
-            
-        //        return flight;
-        //    }
-        //}
-
-        public static Flight ConvertFlight(AddFlightRequest request)
+        public static Flight AddFlight(AddFlightRequest request, FlightPlannerDbContext context)
         {
-            var flight = new Flight
+            lock (FlightLock)
             {
-                From = request.From,
-                To = request.To,
-                ArrivalTime = request.ArrivalTime,
-                DepartureTime = request.DepartureTime,
-                Carrier = request.Carrier,
-            };
-            return flight;
+                var flight = new Flight
+                {
+                    From = request.From,
+                    To = request.To,
+                    ArrivalTime = request.ArrivalTime,
+                    DepartureTime = request.DepartureTime,
+                    Carrier = request.Carrier,
+                };
+
+                context.Flights.Add(flight);
+                context.SaveChanges();
+
+                return flight;
+            }
         }
 
-        //public static void ClearFlights()
-        //{
-        //    lock (FlightLock)
-        //    {
-        //        Flights.Clear();
-        //    }
-        //    _id = 0;
-        //}
+        public static void ClearFlights(FlightPlannerDbContext context)
+        {
+            lock (FlightLock)
+            {
+                context.RemoveRange(context.Flights);
+                context.RemoveRange(context.Airports);
+                context.SaveChanges();
+            }
+        }
+        //remove lock
 
-        //public static void DeleteFlight(int id)
-        //{ 
-        //    var flight = GetFlight(id);
-        //    if (flight != null)
-        //    {
-        //        lock (FlightLock)
-        //        {
-        //            Flights.Remove(flight);
-        //        }
-        //    }
-        //}
+        public static void DeleteFlight(int id, FlightPlannerDbContext context)
+        {
+            lock (FlightLock)
+            {
+                var flight = GetFlight(id, context);
+
+                if (flight != null)
+                { 
+                    context.Flights.Remove(flight);
+                    context.SaveChanges();
+                }
+            }
+        }
 
         public static Flight GetFlight(int id, FlightPlannerDbContext context)
         {
@@ -120,7 +110,7 @@ namespace FlightPlanner_Web.Storage
                     .Where(f =>
                         f.From.AirportName.ToLower().Trim() == req.From.ToLower().Trim() &&
                         f.To.AirportName.ToLower().Trim() == req.To.ToLower().Trim() &&
-                        f.DepartureTime == req.DepartureDate).ToList();
+                        f.DepartureTime.Substring(0, 10) == req.DepartureDate.Substring(0, 10)).ToList();
 
                 return new PageResult(foundFlight);
             }

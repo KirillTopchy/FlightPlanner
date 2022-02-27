@@ -16,6 +16,7 @@ namespace FlightPlanner_Web.Controllers
     public class AdminApiController : ControllerBase
     {
         private readonly FlightPlannerDbContext _context;
+        private static readonly object FlightLock = new();
 
         public AdminApiController(FlightPlannerDbContext context)
         {
@@ -26,66 +27,50 @@ namespace FlightPlanner_Web.Controllers
         [Route("flights/{id}")]
         public IActionResult GetFlights(int id)
         {
-            var flight = _context.Flights
-                .Include(f => f.From)
-                .Include(f => f.To)
-                .SingleOrDefault(f => f.Id == id);
-
-            if (flight == null)
+            lock (FlightLock)
             {
-                return NotFound();
-            }
+                var flight = FlightStorage.GetFlight(id, _context);
 
-            return Ok(flight);
+                if (flight == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(flight);
+            }
         }
+        // remove lock
 
         [HttpDelete]
         [Route("flights/{id}")]
         public IActionResult DeleteFlight(int id)
         {
-            var flight = _context.Flights
-                .Include(f => f.To)
-                .Include(f => f.From)
-                .SingleOrDefault(f => f.Id == id);
-
-            if (flight != null)
+            lock (FlightLock)
             {
-                _context.Flights.Remove(flight);
-                _context.SaveChanges();
-            }
+                FlightStorage.DeleteFlight(id, _context);
 
-            return Ok();
+                return Ok();
+            }
         }
 
         [HttpPut, Authorize]
         [Route("flights")]
         public IActionResult PutFlight(AddFlightRequest request)
-        { 
-            if (!FlightValidation.FlightIsValid(request) || !AirportValidation.AirportIsValid(request))
-            {
-                return BadRequest();
-            }
-
-            if (FlightStorage.Exists(request, _context))
-            {
-                return Conflict();
-            }
-
-            var flight = FlightStorage.ConvertFlight(request);
-            _context.Flights.Add(flight);
-            _context.SaveChanges();
-
-            return Created("", flight);
-        }
-
-        private bool Exists(AddFlightRequest request)
         {
-            return _context.Flights.Any(f =>
-                f.Carrier.ToLower().Trim() == request.Carrier.ToLower().Trim() &&
-                f.DepartureTime.ToLower().Trim() == request.DepartureTime.ToLower().Trim() &&
-                f.ArrivalTime.ToLower().Trim() == request.ArrivalTime.ToLower().Trim() &&
-                f.From.AirportName.ToLower().Trim() == request.From.AirportName.ToLower().Trim() &&
-                f.To.AirportName.ToLower().Trim() == request.To.AirportName.ToLower().Trim());
+            lock (FlightLock)
+            {
+                if (!FlightValidation.FlightIsValid(request) || !AirportValidation.AirportIsValid(request))
+                {
+                    return BadRequest();
+                }
+
+                if (FlightStorage.Exists(request, _context))
+                {
+                    return Conflict();
+                }
+
+                return Created("", FlightStorage.AddFlight(request, _context));
+            }
         }
     }
 }

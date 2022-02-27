@@ -8,6 +8,7 @@ namespace FlightPlanner_Web.Controllers
     public class TestingApiController : ControllerBase
     {
         private readonly FlightPlannerDbContext _context;
+        private static readonly object FlightLock = new();
 
         public TestingApiController(FlightPlannerDbContext context)
         {
@@ -18,11 +19,12 @@ namespace FlightPlanner_Web.Controllers
         [Route("clear")]
         public IActionResult Clear()
         {
-            _context.Flights.RemoveRange(_context.Flights);
-            _context.Airports.RemoveRange(_context.Airports);
-            _context.SaveChanges();
+            lock (FlightLock)
+            {
+                FlightStorage.ClearFlights(_context);
 
-            return Ok();
+                return Ok();
+            }
         }
     }
 }
