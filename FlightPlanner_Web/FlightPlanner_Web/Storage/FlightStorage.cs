@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using FlightPlanner_Web.Models;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +8,6 @@ namespace FlightPlanner_Web.Storage
     public static class FlightStorage
     {
         private static readonly object FlightLock = new();
-
 
         public static Flight AddFlight(AddFlightRequest request, FlightPlannerDbContext context)
         {
@@ -33,14 +31,10 @@ namespace FlightPlanner_Web.Storage
 
         public static void ClearFlights(FlightPlannerDbContext context)
         {
-            lock (FlightLock)
-            {
-                context.RemoveRange(context.Flights);
-                context.RemoveRange(context.Airports);
-                context.SaveChanges();
-            }
+            context.RemoveRange(context.Flights);
+            context.RemoveRange(context.Airports);
+            context.SaveChanges();
         }
-        //remove lock
 
         public static void DeleteFlight(int id, FlightPlannerDbContext context)
         {
@@ -58,13 +52,10 @@ namespace FlightPlanner_Web.Storage
 
         public static Flight GetFlight(int id, FlightPlannerDbContext context)
         {
-            lock (FlightLock)
-            {
-                return context.Flights
+            return context.Flights
                     .Include(f => f.From)
                     .Include(f=> f.To)
                     .SingleOrDefault(f => f.Id == id);
-            }
         }
 
         public static bool Exists(AddFlightRequest request, FlightPlannerDbContext context)
@@ -82,22 +73,19 @@ namespace FlightPlanner_Web.Storage
 
         public static List<Airport> FindAirport(string userInput, FlightPlannerDbContext context)
         {
-            lock (FlightLock)
-            {
-                var fromAirportsList = context.Flights.Where(a =>
+            var fromAirportsList = context.Flights.Where(a =>
                         a.From.AirportName.ToLower().Trim().Contains(userInput.ToLower().Trim()) ||
                         a.From.City.ToLower().Trim().Contains(userInput.ToLower().Trim()) ||
                         a.From.Country.ToLower().Trim().Contains(userInput.ToLower().Trim()))
                     .Select(a => a.From).ToList();
 
-                var toAirportsList = context.Flights.Where(a =>
+            var toAirportsList = context.Flights.Where(a =>
                         a.To.AirportName.ToLower().Trim().Contains(userInput.ToLower().Trim()) ||
                         a.To.City.ToLower().Trim().Contains(userInput.ToLower().Trim()) ||
                         a.To.Country.ToLower().Trim().Contains(userInput.ToLower().Trim()))
                     .Select(a => a.To).ToList();
 
-                return fromAirportsList.Concat(toAirportsList).ToList();
-            }
+            return fromAirportsList.Concat(toAirportsList).ToList();
         }
 
         public static PageResult SearchFlight(SearchFlightRequest req, FlightPlannerDbContext context)

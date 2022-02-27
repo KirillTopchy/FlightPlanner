@@ -1,11 +1,9 @@
-﻿using System.Linq;
-using FlightPlanner_Web.Models;
+﻿using FlightPlanner_Web.Models;
 using FlightPlanner_Web.Storage;
 using FlightPlanner_Web.Validation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace FlightPlanner_Web.Controllers
 {
@@ -27,19 +25,15 @@ namespace FlightPlanner_Web.Controllers
         [Route("flights/{id}")]
         public IActionResult GetFlights(int id)
         {
-            lock (FlightLock)
-            {
-                var flight = FlightStorage.GetFlight(id, _context);
+            var flight = FlightStorage.GetFlight(id, _context);
 
                 if (flight == null)
                 {
                     return NotFound();
                 }
 
-                return Ok(flight);
-            }
+            return Ok(flight);
         }
-        // remove lock
 
         [HttpDelete]
         [Route("flights/{id}")]

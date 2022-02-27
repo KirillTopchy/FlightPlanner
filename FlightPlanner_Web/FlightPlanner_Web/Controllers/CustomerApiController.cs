@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using FlightPlanner_Web.Models;
+﻿using FlightPlanner_Web.Models;
 using FlightPlanner_Web.Storage;
 using FlightPlanner_Web.Validation;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace FlightPlanner_Web.Controllers
 {
