@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using FlightPlanner_Web.Handlers;
+using FlightPlanner_Web.Storage;
 using Microsoft.AspNetCore.Authentication;
 
 namespace FlightPlanner_Web
@@ -38,6 +39,7 @@ namespace FlightPlanner_Web
             services.AddAuthentication("BasicAuthentication")
                 .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
 
+            services.AddDbContext<FlightPlannerDbContext>(ServiceLifetime.Scoped);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
