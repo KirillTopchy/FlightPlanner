@@ -3,42 +3,55 @@ using FlightPlanner_Web.Storage;
 using FlightPlanner_Web.Validation;
 using Microsoft.AspNetCore.Mvc;
 
+
 namespace FlightPlanner_Web.Controllers
 {
     [Route("api")]
     [ApiController]
     public class CustomerApiController : ControllerBase
     {
+        private readonly FlightPlannerDbContext _context;
+        private static readonly object FlightLock = new();
+
+        public CustomerApiController(FlightPlannerDbContext context)
+        {
+            _context = context;
+        }
+
         [HttpGet]
         [Route("airports")]
         public IActionResult SearchAirports(string search)
         {
-            var airports = FlightStorage.FindAirport(search);
-            if (airports != null)
-            {
-                return Ok(airports);
-            }
+            var airports = FlightStorage.FindAirport(search, _context);
 
-            return NotFound();
+                if (airports != null)
+                {
+                    return Ok(airports);
+                }
+
+                return NotFound();
         }
 
         [HttpPost]
         [Route("flights/search")]
         public IActionResult SearchFlights(SearchFlightRequest request)
         {
-            if (!FlightValidation.IsValidSearchFlightRequest(request))
+            lock (FlightLock)
             {
-                return BadRequest();
-            }
+                if (!FlightValidation.IsValidSearchFlightRequest(request))
+                {
+                    return BadRequest();
+                }
 
-            return Ok(FlightStorage.SearchFlight(request));
+                return Ok(FlightStorage.SearchFlight(request, _context));
+            }
         }
 
         [HttpGet]
         [Route("flights/{id}")]
-        public IActionResult SearchFlights(int id)
+        public IActionResult SearchFlightsById(int id)
         {
-            var flight = FlightStorage.GetFlight(id);
+            var flight = FlightStorage.GetFlight(id, _context);
 
             if (flight == null)
             {

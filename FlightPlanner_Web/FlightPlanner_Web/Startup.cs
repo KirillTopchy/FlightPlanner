@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using FlightPlanner_Web.Handlers;
+using FlightPlanner_Web.Storage;
 using Microsoft.AspNetCore.Authentication;
 
 namespace FlightPlanner_Web
@@ -23,12 +24,24 @@ namespace FlightPlanner_Web
         {
 
             services.AddControllers();
-            services.AddAuthentication("BasicAuthentication")
-                .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "FlightPlanner_Web", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "FlightPlanner", Version = "v1" });
             });
+
+            services.AddAuthentication("BasicAuthentication")
+                .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+
+            services.AddDbContext<FlightPlannerDbContext>(ServiceLifetime.Scoped);
+
+            services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
+            {
+                builder.WithOrigins("http://localhost:4200")
+                .AllowAnyHeader()
+                   .AllowCredentials()
+                    .AllowAnyMethod();
+
+            }));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -38,14 +51,22 @@ namespace FlightPlanner_Web
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "FlightPlanner_Web v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "FlightPlanner v1"));
             }
 
             app.UseRouting();
-
+            app.UseCors(builder =>
+            {
+                builder.WithOrigins("http://localhost:4200")
+                                       .AllowAnyHeader()
+                                          .AllowCredentials()
+                                           .AllowAnyMethod();
+            });
             app.UseAuthentication();
             app.UseAuthorization();
-           
+
+
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

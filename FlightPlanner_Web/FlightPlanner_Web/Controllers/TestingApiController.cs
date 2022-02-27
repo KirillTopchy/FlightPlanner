@@ -7,12 +7,24 @@ namespace FlightPlanner_Web.Controllers
     [ApiController]
     public class TestingApiController : ControllerBase
     {
+        private readonly FlightPlannerDbContext _context;
+        private static readonly object FlightLock = new();
+
+        public TestingApiController(FlightPlannerDbContext context)
+        {
+            _context = context;
+        }
+
         [HttpPost]
         [Route("clear")]
         public IActionResult Clear()
         {
-            FlightStorage.ClearFlights();
-            return Ok();
+            lock (FlightLock)
+            {
+                FlightStorage.ClearFlights(_context);
+
+                return Ok();
+            }
         }
     }
 }
