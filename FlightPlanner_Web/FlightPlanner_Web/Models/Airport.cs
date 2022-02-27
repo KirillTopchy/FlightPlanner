@@ -5,7 +5,7 @@ namespace FlightPlanner_Web.Models
 {
     public class Airport
     {
-        [Key]
+        [Key, JsonIgnore]
         public int Id { get; set; }
 
         public string Country { get; set; }

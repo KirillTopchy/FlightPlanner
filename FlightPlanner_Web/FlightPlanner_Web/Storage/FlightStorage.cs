@@ -9,6 +9,7 @@ namespace FlightPlanner_Web.Storage
         private static readonly object FlightLock = new();
         private static readonly List<Flight> Flights = new();
         private static int _id;
+        
 
         public static Flight AddFlight(AddFlightRequest request)
         {
@@ -28,6 +29,19 @@ namespace FlightPlanner_Web.Storage
             
                 return flight;
             }
+        }
+
+        public static Flight ConvertFlight(AddFlightRequest request)
+        {
+            var flight = new Flight
+            {
+                From = request.From,
+                To = request.To,
+                ArrivalTime = request.ArrivalTime,
+                DepartureTime = request.DepartureTime,
+                Carrier = request.Carrier,
+            };
+            return flight;
         }
 
         public static void ClearFlights()
